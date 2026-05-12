@@ -107,7 +107,16 @@ function App() {
   if (authLoading || isLoading) {
     return (
       <div className="loading-screen">
-        <div className="loading-content">
+        <div className="gate-bg" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+          <div className="gate-ring gate-ring-1" />
+          <div className="gate-ring gate-ring-2" />
+          <div className="gate-ring gate-ring-3" />
+          <div className="gate-core" />
+        </div>
+        <div className="shadow-ornament" />
+        <div className="shadow-ornament-left" />
+        <div className="scan-line" />
+        <div className="loading-content" style={{ position: 'relative', zIndex: 1 }}>
           <div className="loading-glitch">[SYSTEM LOADING...]</div>
           <div className="loading-sub">Initializing Hunter Interface</div>
         </div>
@@ -133,6 +142,9 @@ function App() {
 
   return (
     <div className="app">
+      <div className="shadow-ornament" />
+      <div className="shadow-ornament-left" />
+      <div className="scan-line" />
       <SystemStatusBar hunter={hunter} />
 
       <main className="main-content">

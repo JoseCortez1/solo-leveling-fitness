@@ -10,8 +10,19 @@
   --text-secondary: #8892A0;
   --text-accent: #FFD60A;
   
+  /* Manwha palette */
+  --night-black: #181817;
+  --deep-blue: #0a1543;
+  --mana-blue: #19327f;
+  --arcana-blue: #021fa0;
+  --cobalt: #1b45d7;
+  --shadow-purple: #5a189a;
+  --gate-glow: rgba(27, 69, 215, 0.6);
+  --rune-gold: rgba(255, 214, 10, 0.3);
+  
   --font-heading: 'Cinzel', serif;
   --font-body: 'Rajdhani', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
   
   --space-xs: 4px;
   --space-sm: 8px;
@@ -95,6 +106,212 @@ html, body {
 @keyframes xp-fly {
   0% { opacity: 1; transform: translate(0, 0) scale(1); }
   100% { opacity: 0; transform: translate(var(--tx, 0), var(--ty, -60px)) scale(0.5); }
+}
+
+/* ═══ GATE / PORTAL ANIMATIONS ═══ */
+@keyframes gate-rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes gate-pulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); filter: blur(2px); }
+  50% { opacity: 1; transform: scale(1.05); filter: blur(0px); }
+}
+
+@keyframes rune-glow {
+  0%, 100% { border-color: rgba(255, 214, 10, 0.2); box-shadow: 0 0 5px rgba(255, 214, 10, 0.1); }
+  50% { border-color: rgba(255, 214, 10, 0.6); box-shadow: 0 0 20px rgba(255, 214, 10, 0.3), inset 0 0 10px rgba(255, 214, 10, 0.05); }
+}
+
+@keyframes shadow-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
+  33% { transform: translate(10px, -10px) scale(1.1); opacity: 0.4; }
+  66% { transform: translate(-5px, 5px) scale(0.95); opacity: 0.25; }
+}
+
+@keyframes system-scan {
+  0% { transform: translateY(-100%); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(100%); opacity: 0; }
+}
+
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes particle-burst {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--px, 50px), var(--py, -50px)) scale(0); opacity: 0; }
+}
+
+@keyframes text-reveal {
+  0% { clip-path: inset(0 100% 0 0); }
+  100% { clip-path: inset(0 0 0 0); }
+}
+
+/* ═══ DECORATIVE ELEMENTS ═══ */
+
+/* Portal / Gate decorative background */
+.gate-bg {
+  position: fixed;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.gate-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid var(--gate-glow);
+  animation: gate-rotate linear infinite;
+  box-shadow: 0 0 30px var(--gate-glow), inset 0 0 30px var(--gate-glow);
+}
+
+.gate-ring-1 {
+  width: 300px;
+  height: 300px;
+  animation-duration: 20s;
+  opacity: 0.3;
+}
+
+.gate-ring-2 {
+  width: 250px;
+  height: 250px;
+  animation-duration: 15s;
+  animation-direction: reverse;
+  opacity: 0.4;
+}
+
+.gate-ring-3 {
+  width: 200px;
+  height: 200px;
+  animation-duration: 12s;
+  opacity: 0.5;
+}
+
+.gate-core {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--gate-glow) 0%, transparent 70%);
+  animation: gate-pulse 3s ease-in-out infinite;
+}
+
+/* Shadow aesthetic decorations */
+.shadow-ornament {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  width: 200px;
+  height: 300px;
+  background: radial-gradient(ellipse at bottom right, var(--shadow-purple) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  animation: shadow-drift 8s ease-in-out infinite;
+  opacity: 0.2;
+}
+
+.shadow-ornament-left {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 150px;
+  height: 250px;
+  background: radial-gradient(ellipse at top left, #3b0a6e 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  animation: shadow-drift 10s ease-in-out infinite 2s;
+  opacity: 0.15;
+}
+
+/* Rune border effect */
+.rune-border {
+  position: relative;
+  border: 1px solid var(--rune-gold);
+  border-radius: var(--radius-lg);
+  animation: rune-glow 4s ease-in-out infinite;
+}
+
+.rune-border::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border: 1px solid transparent;
+  border-radius: calc(var(--radius-lg) + 4px);
+  background: linear-gradient(135deg, var(--accent-gold), transparent, var(--accent-blue), transparent) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* System notification toast */
+.system-notification {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(10, 21, 67, 0.95);
+  border: 1px solid var(--accent-blue);
+  border-radius: var(--radius-md);
+  padding: 12px 20px;
+  color: var(--accent-blue);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  z-index: 1000;
+  animation: text-reveal 0.3s ease-out;
+  box-shadow: 0 0 20px rgba(79, 195, 247, 0.3);
+  text-shadow: 0 0 10px rgba(79, 195, 247, 0.5);
+}
+
+.system-notification::before {
+  content: '[SYSTEM] ';
+  color: var(--accent-gold);
+}
+
+/* HP Bar style for XP */
+.xp-bar-container.hud-style {
+  height: 6px;
+  border: 1px solid var(--accent-gold);
+  border-radius: 0;
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.xp-bar-container.hud-style .xp-bar-fill {
+  border-radius: 0;
+  background: linear-gradient(90deg, var(--accent-blue), var(--cobalt));
+}
+
+.xp-bar-container.hud-style .xp-bar-fill::after {
+  display: none;
+}
+
+/* Scanner line effect */
+.scan-line {
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-blue), transparent);
+  pointer-events: none;
+  z-index: 999;
+  animation: system-scan 4s ease-in-out infinite;
+  opacity: 0.3;
+}
+
+/* Terminal cursor */
+.terminal-cursor::after {
+  content: '▊';
+  color: var(--accent-blue);
+  animation: cursor-blink 1s step-end infinite;
+  margin-left: 4px;
 }
 
 /* Activation Screen */

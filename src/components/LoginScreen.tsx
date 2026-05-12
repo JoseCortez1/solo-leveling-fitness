@@ -41,7 +41,15 @@ export function LoginScreen({ onSuccess }: LoginScreenProps) {
 
   return (
     <div className="login-screen">
-      <div className="login-content">
+      <div className="gate-bg" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+        <div className="gate-ring gate-ring-1" />
+        <div className="gate-ring gate-ring-2" />
+        <div className="gate-ring gate-ring-3" />
+        <div className="gate-core" />
+      </div>
+      <div className="shadow-ornament" />
+      <div className="shadow-ornament-left" />
+      <div className="login-content" style={{ position: 'relative', zIndex: 1 }}>
         <div className="login-system-icon">⚔️</div>
         <h1 className="login-title">SOLO LEVELING</h1>
         <h2 className="login-subtitle">Hunter System</h2>
