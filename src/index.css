@@ -1,3 +1,29 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg-primary: #0D0D1A;
+  --color-bg-secondary: #1A1A2E;
+  --color-bg-panel: #16213E;
+  --color-accent-gold: #FFD60A;
+  --color-accent-blue: #4FC3F7;
+  --color-danger: #FF4757;
+  --color-success: #2ED573;
+  --color-text-primary: #E8E8E8;
+  --color-text-secondary: #8892A0;
+  --color-night-black: #181817;
+  --color-deep-blue: #0a1543;
+  --color-mana-blue: #19327f;
+  --color-arcana-blue: #021fa0;
+  --color-cobalt: #1b45d7;
+  --color-shadow-purple: #5a189a;
+  --color-gate-glow: rgba(27, 69, 215, 0.6);
+  --color-rune-gold: rgba(255, 214, 10, 0.3);
+  
+  --font-heading: 'Cinzel', serif;
+  --font-body: 'Rajdhani', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
 :root {
   --bg-primary: #0D0D1A;
   --bg-secondary: #1A1A2E;
@@ -10,7 +36,6 @@
   --text-secondary: #8892A0;
   --text-accent: #FFD60A;
   
-  /* Manwha palette */
   --night-black: #181817;
   --deep-blue: #0a1543;
   --mana-blue: #19327f;

@@ -1,5 +1,4 @@
 import { Hunter, DailyState, RANK_COLORS } from '../types';
-import { Zap, Heart, Wind, Shield } from 'lucide-react';
 
 interface DashboardProps {
   hunter: Hunter;
@@ -20,11 +19,11 @@ export function Dashboard({ hunter, dailyState, onOpenQuests }: DashboardProps) 
     return titles[hunter.rank] || 'Hunter';
   };
 
-  const statIcons = {
-    str: Zap,
-    sta: Heart,
-    agi: Wind,
-    vit: Shield,
+  const statImages = {
+    str: '/assets/stat-strength.png',
+    sta: '/assets/stat-stamina.png',
+    agi: '/assets/stat-agility.png',
+    vit: '/assets/stat-vitality.png',
   };
 
   const statLabels = {
@@ -63,11 +62,10 @@ export function Dashboard({ hunter, dailyState, onOpenQuests }: DashboardProps) 
 
         <div className="stats-grid">
           {(Object.keys(hunter.stats) as Array<keyof typeof hunter.stats>).map(stat => {
-            const Icon = statIcons[stat];
             return (
               <div key={stat} className="stat-block">
                 <div className={`stat-icon ${stat}`}>
-                  <Icon size={18} color="white" />
+                  <img src={statImages[stat]} alt={statLabels[stat]} className="w-[18px] h-[18px] object-contain" />
                 </div>
                 <div className="stat-info">
                   <div className="stat-label">{statLabels[stat]}</div>
