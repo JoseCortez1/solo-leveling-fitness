@@ -13,7 +13,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = parseInt(process.env.PORT || '3001');
 
-app.use(cors({ origin: ['http://localhost:5173', 'http://127.0.0.1:5173', 'https://solo-leveling.educortez.com'], credentials: true }));
+app.use(cors({ origin: ['http://localhost:5173', 'http://127.0.0.1:5173', 'https://solo-fitnessling.educortez.com', 'http://solo-fitnessling.educortez.com'], credentials: true }));
 app.use(express.json());
 
 // Init DB (async)
