@@ -1,16 +1,14 @@
 import { Router, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { getDb } from '../db.js';
+import { queryOne, queryAll, execute } from '../db.js';
 import { AuthRequest } from '../auth.js';
-import { getRankFromLevel, DIFFICULTY_CONFIG } from '../types.js';
+import { getRankFromLevel, DIFFICULTY_CONFIG, Difficulty } from '../types.js';
 
 const router = Router();
 
-// GET /api/quests — Get daily quests, regenerate if new day
+// GET /api/quests
 router.get('/', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-  const hunter = db.prepare('SELECT * FROM hunters WHERE user_id = ?').get(req.userId!) as any;
-
+  const hunter = queryOne('SELECT * FROM hunters WHERE user_id = ?', [req.userId]);
   if (!hunter) {
     res.status(404).json({ error: '[SYSTEM] No hunter found' });
     return;
@@ -18,62 +16,57 @@ router.get('/', (req: AuthRequest, res: Response) => {
 
   const today = new Date().toISOString().split('T')[0];
 
-  // Check if it's a new day
   if (hunter.last_active_date !== today) {
-    // Update last active and reset streak
     const newStreak = hunter.last_active_date
-      ? (isYesterday(hunter.last_active_date) ? hunter.streak + 1 : 0)
+      ? (isYesterday(hunter.last_active_date) ? (hunter.streak || 0) + 1 : 0)
       : 0;
 
-    db.prepare('UPDATE hunters SET last_active_date = ?, streak = ? WHERE id = ?')
-      .run(today, newStreak, hunter.id);
-
-    // Delete old quests, create new ones
-    db.prepare('DELETE FROM daily_quests WHERE hunter_id = ? AND date = ?')
-      .run(hunter.id, today);
-
-    createDailyQuests(db, hunter.id, today, hunter.difficulty);
+    execute('UPDATE hunters SET last_active_date = ?, streak = ? WHERE id = ?', [today, newStreak, hunter.id]);
+    execute('DELETE FROM daily_quests WHERE hunter_id = ? AND date = ?', [hunter.id, today]);
+    createDailyQuests(hunter.id, today, hunter.difficulty as Difficulty);
   }
 
-  const quests = db.prepare('SELECT * FROM daily_quests WHERE hunter_id = ? AND date = ? ORDER BY quest_index')
-    .all(hunter.id, today) as any[];
+  const quests = queryAll(
+    'SELECT * FROM daily_quests WHERE hunter_id = ? AND date = ? ORDER BY quest_index',
+    [hunter.id, today]
+  );
 
   const completedCount = quests.filter((q: any) => q.completed === 1).length;
 
   res.json({ date: today, quests, questsCompleted: completedCount });
 });
 
-// PUT /api/quests/:id/progress — Update reps for a quest
+// PUT /api/quests/:id/progress
 router.put('/:id/progress', (req: AuthRequest, res: Response) => {
   const { id } = req.params;
   const { currentReps } = req.body;
 
-  const db = getDb();
-  const quest = db.prepare(
-    'SELECT q.* FROM daily_quests q JOIN hunters h ON q.hunter_id = h.id WHERE q.id = ? AND h.user_id = ?'
-  ).get(id, req.userId!) as any;
+  const quest = queryOne(
+    'SELECT q.*, h.user_id FROM daily_quests q JOIN hunters h ON q.hunter_id = h.id WHERE q.id = ?',
+    [id]
+  );
 
-  if (!quest) {
+  if (!quest || quest.user_id !== req.userId) {
     res.status(404).json({ error: '[SYSTEM] Quest not found' });
     return;
   }
 
   const clampedReps = Math.min(Math.max(0, currentReps), quest.target_reps);
-  db.prepare('UPDATE daily_quests SET current_reps = ? WHERE id = ?').run(clampedReps, id);
+  execute('UPDATE daily_quests SET current_reps = ? WHERE id = ?', [clampedReps, id]);
 
   res.json({ id, currentReps: clampedReps, targetReps: quest.target_reps });
 });
 
-// POST /api/quests/:id/complete — Complete a quest, gain XP, check level up
+// POST /api/quests/:id/complete
 router.post('/:id/complete', (req: AuthRequest, res: Response) => {
   const { id } = req.params;
 
-  const db = getDb();
-  const quest = db.prepare(
-    'SELECT q.*, h.xp as hunter_xp, h.level, h.rank, h.id as hunter_id FROM daily_quests q JOIN hunters h ON q.hunter_id = h.id WHERE q.id = ? AND h.user_id = ?'
-  ).get(id, req.userId!) as any;
+  const quest = queryOne(
+    'SELECT q.*, h.xp as hunter_xp, h.level, h.rank, h.id as hunter_id, h.difficulty FROM daily_quests q JOIN hunters h ON q.hunter_id = h.id WHERE q.id = ?',
+    [id]
+  );
 
-  if (!quest) {
+  if (!quest || quest.user_id !== req.userId) {
     res.status(404).json({ error: '[SYSTEM] Quest not found' });
     return;
   }
@@ -89,12 +82,12 @@ router.post('/:id/complete', (req: AuthRequest, res: Response) => {
   }
 
   // Mark quest as completed
-  db.prepare('UPDATE daily_quests SET completed = 1 WHERE id = ?').run(id);
+  execute('UPDATE daily_quests SET completed = 1 WHERE id = ?', [id]);
 
   // Add XP
   const diffConfig = DIFFICULTY_CONFIG[quest.difficulty as keyof typeof DIFFICULTY_CONFIG] || DIFFICULTY_CONFIG.D;
   const xpGained = Math.round(quest.xp_reward * diffConfig.xpMultiplier);
-  let newXP = quest.hunter_xp + xpGained;
+  let newXP = (quest.hunter_xp || 0) + xpGained;
   let newLevel = quest.level;
   let levelUp = false;
 
@@ -105,32 +98,28 @@ router.post('/:id/complete', (req: AuthRequest, res: Response) => {
   }
 
   const newRank = getRankFromLevel(newLevel);
+  execute('UPDATE hunters SET xp = ?, level = ?, rank = ? WHERE id = ?', [newXP, newLevel, newRank, quest.hunter_id]);
 
-  db.prepare('UPDATE hunters SET xp = ?, level = ?, rank = ? WHERE id = ?')
-    .run(newXP, newLevel, newRank, quest.hunter_id);
-
-  // Check if all quests are done (bonus XP)
+  // Check all quests completed (bonus XP)
   const today = new Date().toISOString().split('T')[0];
-  const remainingUncompleted = db.prepare(
-    'SELECT COUNT(*) as count FROM daily_quests WHERE hunter_id = ? AND date = ? AND completed = 0 AND id != ?'
-  ).get(quest.hunter_id, today, id) as any;
+  const remaining = queryAll(
+    'SELECT id FROM daily_quests WHERE hunter_id = ? AND date = ? AND completed = 0 AND id != ?',
+    [quest.hunter_id, today, id]
+  );
 
   let allCleared = false;
-  if (remainingUncompleted.count === 0) {
+  if (remaining.length === 0) {
     allCleared = true;
-    // Bonus XP for clearing all
     const bonusXP = 50;
     newXP += bonusXP;
 
-    // Level up check after bonus
     while (newXP >= newLevel * 100) {
       newXP -= newLevel * 100;
       newLevel++;
       levelUp = true;
     }
     const finalRank = getRankFromLevel(newLevel);
-    db.prepare('UPDATE hunters SET xp = ?, level = ?, rank = ? WHERE id = ?')
-      .run(newXP, newLevel, finalRank, quest.hunter_id);
+    execute('UPDATE hunters SET xp = ?, level = ?, rank = ? WHERE id = ?', [newXP, newLevel, finalRank, quest.hunter_id]);
   }
 
   res.json({
@@ -144,8 +133,8 @@ router.post('/:id/complete', (req: AuthRequest, res: Response) => {
   });
 });
 
-function createDailyQuests(db: any, hunterId: string, date: string, difficulty: string): void {
-  const config = DIFFICULTY_CONFIG[difficulty as keyof typeof DIFFICULTY_CONFIG] || DIFFICULTY_CONFIG.D;
+function createDailyQuests(hunterId: string, date: string, difficulty: Difficulty): void {
+  const config = DIFFICULTY_CONFIG[difficulty] || DIFFICULTY_CONFIG.D;
   const baseQuests = [
     { name: 'Hunt 10 Low-Level Monsters', exercise: 'pushups', baseReps: 10, xp: 50 },
     { name: 'Clear a Dungeon Floor', exercise: 'squats', baseReps: 20, xp: 75 },
@@ -154,15 +143,14 @@ function createDailyQuests(db: any, hunterId: string, date: string, difficulty: 
     { name: 'Meditate in the Shadow', exercise: 'wallsit', baseReps: 45, xp: 40 },
   ];
 
-  const insert = db.prepare(
-    'INSERT INTO daily_quests (id, hunter_id, date, quest_index, name, exercise, target_reps, current_reps, xp_reward, completed) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, 0)'
-  );
-
   for (let i = 0; i < baseQuests.length; i++) {
     const q = baseQuests[i];
-    const targetReps = Math.round(q.baseReps * config.repMultiplier);
-    const xpReward = Math.round(q.xp * config.xpMultiplier);
-    insert.run(uuidv4(), hunterId, date, i, q.name, q.exercise, Math.max(1, targetReps), Math.max(1, xpReward));
+    const targetReps = Math.max(1, Math.round(q.baseReps * config.repMultiplier));
+    const xpReward = Math.max(1, Math.round(q.xp * config.xpMultiplier));
+    execute(
+      'INSERT INTO daily_quests (id, hunter_id, date, quest_index, name, exercise, target_reps, current_reps, xp_reward, completed) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, 0)',
+      [uuidv4(), hunterId, date, i, q.name, q.exercise, targetReps, xpReward]
+    );
   }
 }
 

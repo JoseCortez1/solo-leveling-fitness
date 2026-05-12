@@ -1,7 +1,7 @@
 import { Router, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
-import { getDb } from '../db.js';
+import { queryOne, execute } from '../db.js';
 import { generateToken, AuthRequest } from '../auth.js';
 
 const router = Router();
@@ -20,9 +20,7 @@ router.post('/register', (req: AuthRequest, res: Response) => {
     return;
   }
 
-  const db = getDb();
-  const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email) as any;
-
+  const existing = queryOne('SELECT id FROM users WHERE email = ?', [email]);
   if (existing) {
     res.status(409).json({ error: '[SYSTEM] Email already registered' });
     return;
@@ -31,7 +29,7 @@ router.post('/register', (req: AuthRequest, res: Response) => {
   const id = uuidv4();
   const password_hash = bcrypt.hashSync(password, 10);
 
-  db.prepare('INSERT INTO users (id, name, email, password_hash) VALUES (?, ?, ?, ?)').run(id, name, email, password_hash);
+  execute('INSERT INTO users (id, name, email, password_hash) VALUES (?, ?, ?, ?)', [id, name, email, password_hash]);
 
   const token = generateToken(id);
   res.status(201).json({ token, user: { id, name, email } });
@@ -46,8 +44,7 @@ router.post('/login', (req: AuthRequest, res: Response) => {
     return;
   }
 
-  const db = getDb();
-  const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email) as any;
+  const user = queryOne('SELECT * FROM users WHERE email = ?', [email]);
 
   if (!user || !bcrypt.compareSync(password, user.password_hash)) {
     res.status(401).json({ error: '[SYSTEM] Invalid email or password' });
@@ -58,10 +55,9 @@ router.post('/login', (req: AuthRequest, res: Response) => {
   res.json({ token, user: { id: user.id, name: user.email } });
 });
 
-// GET /api/auth/me (requires auth middleware)
+// GET /api/auth/me
 router.get('/me', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-  const user = db.prepare('SELECT id, name, email, created_at FROM users WHERE id = ?').get(req.userId) as any;
+  const user = queryOne('SELECT id, name, email, created_at FROM users WHERE id = ?', [req.userId]);
 
   if (!user) {
     res.status(404).json({ error: '[SYSTEM] User not found' });
