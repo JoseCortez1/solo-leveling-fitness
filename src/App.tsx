@@ -147,7 +147,7 @@ function App() {
       <div className="scan-line fixed left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-accent-blue to-transparent pointer-events-none z-[999] animate-[system-scan_4s_ease-in-out_infinite] opacity-30" />
       <SystemStatusBar hunter={hunter} />
 
-      <main className="main-content">
+      <main className="flex-1 px-4 pb-20 overflow-y-auto">
         {activeTab === 'dashboard' && (
           <Dashboard
             hunter={hunter}
