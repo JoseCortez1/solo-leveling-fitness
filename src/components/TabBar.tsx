@@ -15,18 +15,21 @@ export function TabBar({ activeTab, onTabChange }: TabBarProps) {
   ];
 
   return (
-    <nav className="tab-bar">
-      <div className="tab-bar-inner">
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            className={`tab-btn ${activeTab === tab.id ? 'active' : ''}`}
-            onClick={() => onTabChange(tab.id)}
-          >
-            <tab.icon size={20} className="tab-icon" />
-            <span className="tab-label">{tab.label}</span>
-          </button>
-        ))}
+    <nav className="fixed bottom-0 left-0 right-0 bg-bg-secondary flex justify-center py-2 z-[100] border-t border-bg-panel">
+      <div className="flex gap-1 max-w-md w-full justify-around">
+        {tabs.map(tab => {
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              className={`flex flex-col items-center gap-0.5 p-2 min-w-[80px] transition-colors duration-200 border-none bg-transparent cursor-pointer ${isActive ? 'text-accent-gold' : 'text-text-secondary'}`}
+              onClick={() => onTabChange(tab.id)}
+            >
+              <tab.icon size={20} className={isActive ? 'drop-shadow-[0_0_4px_var(--accent-gold)]' : ''} />
+              <span className="text-[0.7rem] font-semibold uppercase tracking-wide">{tab.label}</span>
+            </button>
+          );
+        })}
       </div>
     </nav>
   );

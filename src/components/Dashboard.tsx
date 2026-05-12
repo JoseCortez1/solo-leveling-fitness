@@ -1,4 +1,7 @@
 import { Hunter, DailyState, RANK_COLORS } from '../types';
+import { Card, CardContent } from './ui/card';
+import { Badge } from './ui/badge';
+import { Button } from './ui/button';
 
 interface DashboardProps {
   hunter: Hunter;
@@ -33,74 +36,124 @@ export function Dashboard({ hunter, dailyState, onOpenQuests }: DashboardProps) 
     vit: 'Vitality',
   };
 
+  const statGradients = {
+    str: 'from-red-500/20 to-red-600/10',
+    sta: 'from-green-500/20 to-green-600/10',
+    agi: 'from-blue-500/20 to-blue-600/10',
+    vit: 'from-purple-500/20 to-purple-600/10',
+  };
+
+  const rankColor = RANK_COLORS[hunter.rank];
+
   return (
-    <div className="dashboard">
-      <div className="hunter-card">
-        <div className="hunter-header">
-          <div
-            className="hunter-avatar"
-            style={{ borderColor: RANK_COLORS[hunter.rank] }}
-          >
-            ⚔️
-          </div>
-          <div className="hunter-info">
-            <div className="hunter-name">{hunter.name}</div>
-            <div className="hunter-title" style={{ color: RANK_COLORS[hunter.rank] }}>
-              {getTitle()}
+    <div className="flex flex-col gap-4 p-4">
+      {/* Hunter Card */}
+      <Card className="overflow-hidden">
+        <CardContent className="p-5">
+          <div className="flex items-center gap-4">
+            {/* Avatar with gradient */}
+            <div
+              className="w-14 h-14 rounded-xl bg-gradient-to-br from-accent-gold to-yellow-600 flex items-center justify-center text-2xl shadow-lg shadow-accent-gold/30 shrink-0"
+              style={{ border: `2px solid ${rankColor}` }}
+            >
+              ⚔️
             </div>
-          </div>
-          <div
-            className="rank-badge"
-            style={{
-              color: RANK_COLORS[hunter.rank],
-              borderColor: RANK_COLORS[hunter.rank],
-            }}
-          >
-            {hunter.rank}
-          </div>
-        </div>
 
-        <div className="stats-grid">
-          {(Object.keys(hunter.stats) as Array<keyof typeof hunter.stats>).map(stat => {
-            return (
-              <div key={stat} className="stat-block">
-                <div className={`stat-icon ${stat}`}>
-                  <img src={statImages[stat]} alt={statLabels[stat]} className="w-[18px] h-[18px] object-contain" />
-                </div>
-                <div className="stat-info">
-                  <div className="stat-label">{statLabels[stat]}</div>
-                  <div className="stat-number">{hunter.stats[stat]}</div>
-                </div>
+            {/* Hunter info */}
+            <div className="flex-1 min-w-0">
+              <div className="font-heading text-lg text-text-primary truncate">
+                {hunter.name}
               </div>
-            );
-          })}
-        </div>
-      </div>
+              <div className="text-sm font-medium" style={{ color: rankColor }}>
+                {getTitle()}
+              </div>
+            </div>
 
-      <div className="daily-progress">
-        <div className="section-title">Daily Hunt Progress</div>
-        <div className="progress-stats">
-          <div className="progress-stat">
-            <div className="progress-value">
-              {dailyState?.questsCompleted ?? 0}
+            {/* Rank Badge */}
+            <Badge
+              variant="rank"
+              className="text-xl font-bold w-12 h-12 rounded-full flex items-center justify-center shrink-0"
+              style={{
+                color: rankColor,
+                borderColor: rankColor,
+                backgroundColor: `${rankColor}15`,
+              }}
+            >
+              {hunter.rank}
+            </Badge>
+          </div>
+
+          {/* Stats Grid 2x2 */}
+          <div className="grid grid-cols-2 gap-3 mt-5">
+            {(Object.keys(hunter.stats) as Array<keyof typeof hunter.stats>).map(stat => {
+              return (
+                <div
+                  key={stat}
+                  className={`flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r ${statGradients[stat]} border border-white/5`}
+                >
+                  <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${statGradients[stat]} flex items-center justify-center shrink-0`}>
+                    <img
+                      src={statImages[stat]}
+                      alt={statLabels[stat]}
+                      className="w-[18px] h-[18px] object-contain"
+                    />
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <div className="text-xs text-text-secondary font-body">
+                      {statLabels[stat]}
+                    </div>
+                    <div className="text-lg font-bold text-text-primary font-heading">
+                      {hunter.stats[stat]}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Daily Progress Card */}
+      <Card>
+        <CardContent className="p-5">
+          <h3 className="font-heading text-base text-text-primary mb-4">
+            Daily Hunt Progress
+          </h3>
+
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            <div className="flex flex-col items-center p-3 rounded-lg bg-white/5">
+              <div className="text-2xl font-bold text-accent-blue font-heading">
+                {dailyState?.questsCompleted ?? 0}
+              </div>
+              <div className="text-xs text-text-secondary font-body text-center mt-1">
+                Quests Cleared
+              </div>
             </div>
-            <div className="progress-label">Quests Cleared</div>
-          </div>
-          <div className="progress-stat">
-            <div className="progress-value">
-              {dailyState?.quests.length ?? 0}
+
+            <div className="flex flex-col items-center p-3 rounded-lg bg-white/5">
+              <div className="text-2xl font-bold text-accent-gold font-heading">
+                {dailyState?.quests.length ?? 0}
+              </div>
+              <div className="text-xs text-text-secondary font-body text-center mt-1">
+                Total Quests
+              </div>
             </div>
-            <div className="progress-label">Total Quests</div>
+
+            <div className="flex flex-col items-center p-3 rounded-lg bg-white/5">
+              <div className="text-2xl font-bold text-success font-heading">
+                {hunter.streak}
+              </div>
+              <div className="text-xs text-text-secondary font-body text-center mt-1">
+                Day Streak
+              </div>
+            </div>
           </div>
-          <div className="progress-stat">
-            <div className="progress-value">{hunter.streak}</div>
-            <div className="progress-label">Day Streak</div>
-          </div>
-        </div>
-        <button className="daily-quests-btn" onClick={onOpenQuests}>
-          View Today's Quests
-        </button>
-      </div>
+
+          <Button variant="blue" className="w-full" onClick={onOpenQuests}>
+            View Today's Quests
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }

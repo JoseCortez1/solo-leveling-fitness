@@ -15,10 +15,10 @@ export function Profile({ hunter }: ProfileProps) {
   };
 
   return (
-    <div className="profile-container">
-      <div className="rank-progression">
-        <div className="section-title">Rank Progression</div>
-        <div className="rank-track">
+    <div className="flex flex-col gap-6">
+      <div className="bg-bg-panel rounded-xl p-6">
+        <div className="font-heading text-xs text-accent-blue uppercase tracking-widest mb-4">Rank Progression</div>
+        <div className="flex justify-between items-center mt-3 relative">
           {RANK_ORDER.map((rank, index) => {
             const isAchieved = index <= currentRankIndex;
             const isCurrent = index === currentRankIndex;
@@ -27,62 +27,62 @@ export function Profile({ hunter }: ProfileProps) {
             return (
               <div
                 key={rank}
-                className={`rank-node ${isAchieved ? 'achieved' : ''} ${isCurrent ? 'current' : ''}`}
-                style={{ color }}
+                className="flex flex-col items-center gap-1 relative z-10"
               >
                 <div
-                  className="rank-circle"
+                  className={`w-10 h-10 rounded-full flex items-center justify-center font-heading text-sm font-bold border-2 transition-all duration-300 ${isAchieved ? 'border-current' : 'border-bg-secondary bg-bg-secondary'} ${isCurrent ? 'animate-pulse-glow' : ''}`}
                   style={{
                     color: isAchieved ? color : undefined,
                     borderColor: isAchieved ? color : undefined,
                     background: isCurrent ? undefined : isAchieved ? 'rgba(255,255,255,0.1)' : undefined,
+                    boxShadow: isAchieved ? `0 0 10px ${color}` : undefined,
                   }}
                 >
                   {rank}
                 </div>
-                <span className="rank-label">Lv {RANK_THRESHOLDS[rank]}</span>
+                <span className={`text-[0.65rem] uppercase ${isAchieved ? 'text-text-primary' : 'text-text-secondary'}`}>Lv {RANK_THRESHOLDS[rank]}</span>
               </div>
             );
           })}
         </div>
       </div>
 
-      <div className="history-section">
-        <div className="section-title">Hunter Statistics</div>
-        <div className="history-stats">
-          <div className="history-stat">
-            <div className="history-stat-value">{hunter.level}</div>
-            <div className="history-stat-label">Current Level</div>
+      <div className="bg-bg-panel rounded-xl p-6">
+        <div className="font-heading text-xs text-accent-blue uppercase tracking-widest mb-4">Hunter Statistics</div>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="text-center p-3 bg-bg-secondary rounded-lg">
+            <div className="text-2xl font-bold text-accent-gold">{hunter.level}</div>
+            <div className="text-[0.7rem] text-text-secondary uppercase mt-1">Current Level</div>
           </div>
-          <div className="history-stat">
-            <div className="history-stat-value">{hunter.xp}</div>
-            <div className="history-stat-label">Current XP</div>
+          <div className="text-center p-3 bg-bg-secondary rounded-lg">
+            <div className="text-2xl font-bold text-accent-gold">{hunter.xp}</div>
+            <div className="text-[0.7rem] text-text-secondary uppercase mt-1">Current XP</div>
           </div>
-          <div className="history-stat">
-            <div className="history-stat-value">{hunter.streak}</div>
-            <div className="history-stat-label">Day Streak</div>
+          <div className="text-center p-3 bg-bg-secondary rounded-lg">
+            <div className="text-2xl font-bold text-accent-gold">{hunter.streak}</div>
+            <div className="text-[0.7rem] text-text-secondary uppercase mt-1">Day Streak</div>
           </div>
-          <div className="history-stat">
-            <div className="history-stat-value">{getDaysSinceCreation()}</div>
-            <div className="history-stat-label">Days Active</div>
+          <div className="text-center p-3 bg-bg-secondary rounded-lg">
+            <div className="text-2xl font-bold text-accent-gold">{getDaysSinceCreation()}</div>
+            <div className="text-[0.7rem] text-text-secondary uppercase mt-1">Days Active</div>
           </div>
         </div>
       </div>
 
-      <div className="history-section">
-        <div className="section-title">Hunter Profile</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: '8px' }}>
-            <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Hunter Name</span>
-            <span style={{ color: 'var(--accent-gold)', fontWeight: 600 }}>{hunter.name}</span>
+      <div className="bg-bg-panel rounded-xl p-6">
+        <div className="font-heading text-xs text-accent-blue uppercase tracking-widest mb-4">Hunter Profile</div>
+        <div className="flex flex-col gap-2 mt-3">
+          <div className="flex justify-between items-center p-2 px-3 bg-bg-secondary rounded-lg">
+            <span className="text-[0.85rem] text-text-secondary">Hunter Name</span>
+            <span className="font-semibold text-accent-gold">{hunter.name}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: '8px' }}>
-            <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Current Rank</span>
-            <span style={{ color: RANK_COLORS[hunter.rank], fontWeight: 600 }}>{hunter.rank}-Rank</span>
+          <div className="flex justify-between items-center p-2 px-3 bg-bg-secondary rounded-lg">
+            <span className="text-[0.85rem] text-text-secondary">Current Rank</span>
+            <span className="font-semibold" style={{ color: RANK_COLORS[hunter.rank] }}>{hunter.rank}-Rank</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: '8px' }}>
-            <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Total Stats</span>
-            <span style={{ color: 'var(--accent-gold)', fontWeight: 600 }}>
+          <div className="flex justify-between items-center p-2 px-3 bg-bg-secondary rounded-lg">
+            <span className="text-[0.85rem] text-text-secondary">Total Stats</span>
+            <span className="font-semibold text-accent-gold">
               {hunter.stats.str + hunter.stats.sta + hunter.stats.agi + hunter.stats.vit}
             </span>
           </div>

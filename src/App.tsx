@@ -106,19 +106,19 @@ function App() {
 
   if (authLoading || isLoading) {
     return (
-      <div className="loading-screen">
-        <div className="gate-bg" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
-          <div className="gate-ring gate-ring-1" />
-          <div className="gate-ring gate-ring-2" />
-          <div className="gate-ring gate-ring-3" />
-          <div className="gate-core" />
+      <div className="fixed inset-0 bg-black flex items-center justify-center z-[9999]">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+          <div className="w-[300px] h-[300px] rounded-full border-2 border-blue-500/30 animate-[spin_20s_linear_infinite]" />
+          <div className="w-[250px] h-[250px] rounded-full border-2 border-blue-500/40 animate-[spin_15s_linear_infinite_reverse] -mt-[250px] ml-[25px]" />
+          <div className="w-[200px] h-[200px] rounded-full border-2 border-blue-500/50 animate-[spin_12s_linear_infinite] -mt-[200px] ml-[50px]" />
+          <div className="w-[100px] h-[100px] rounded-full bg-blue-500/30 blur-xl animate-pulse -mt-[100px] ml-[100px]" />
         </div>
-        <div className="shadow-ornament" />
-        <div className="shadow-ornament-left" />
-        <div className="scan-line" />
-        <div className="loading-content" style={{ position: 'relative', zIndex: 1 }}>
-          <div className="loading-glitch">[SYSTEM LOADING...]</div>
-          <div className="loading-sub">Initializing Hunter Interface</div>
+        <div className="shadow-ornament fixed bottom-0 right-0 w-[200px] h-[300px] bg-purple-900/20 rounded-full blur-3xl animate-pulse pointer-events-none" />
+        <div className="shadow-ornament-left fixed top-0 left-0 w-[150px] h-[250px] bg-purple-800/15 rounded-full blur-3xl animate-pulse pointer-events-none" />
+        <div className="scan-line fixed left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-accent-blue to-transparent pointer-events-none z-[999] animate-[system-scan_4s_ease-in-out_infinite] opacity-30" />
+        <div className="text-center relative z-10">
+          <div className="font-heading text-xl text-accent-gold animate-pulse tracking-[0.25em]">[SYSTEM LOADING...]</div>
+          <div className="font-body text-xs text-text-secondary mt-4 tracking-[0.125em] uppercase">Initializing Hunter Interface</div>
         </div>
       </div>
     );
@@ -141,10 +141,10 @@ function App() {
   };
 
   return (
-    <div className="app">
-      <div className="shadow-ornament" />
-      <div className="shadow-ornament-left" />
-      <div className="scan-line" />
+    <div className="relative min-h-screen bg-black text-white overflow-hidden">
+      <div className="shadow-ornament fixed bottom-0 right-0 w-[200px] h-[300px] bg-purple-900/20 rounded-full blur-3xl animate-pulse pointer-events-none" />
+      <div className="shadow-ornament-left fixed top-0 left-0 w-[150px] h-[250px] bg-purple-800/15 rounded-full blur-3xl animate-pulse pointer-events-none" />
+      <div className="scan-line fixed left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-accent-blue to-transparent pointer-events-none z-[999] animate-[system-scan_4s_ease-in-out_infinite] opacity-30" />
       <SystemStatusBar hunter={hunter} />
 
       <main className="main-content">
@@ -178,10 +178,10 @@ function App() {
       )}
 
       {showLevelUp && levelUpLevel && (
-        <div className="level-up-overlay">
-          <div className="level-up-content">
-            <div className="level-up-text">[LEVEL UP!]</div>
-            <div className="level-up-number">{levelUpLevel}</div>
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[500] animate-[fade-in_0.3s_ease-out]">
+          <div className="text-center animate-[level-up-flash_3s_ease-out_forwards]">
+            <div className="font-heading text-5xl text-accent-gold tracking-[0.25em]" style={{textShadow: '0 0 30px #FFD60A, 0 0 60px #FFD60A'}}>[LEVEL UP!]</div>
+            <div className="text-7xl font-bold text-accent-gold mt-4">{levelUpLevel}</div>
           </div>
         </div>
       )}
