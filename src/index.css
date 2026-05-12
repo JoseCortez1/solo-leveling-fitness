@@ -940,6 +940,198 @@ html, body {
   margin-bottom: var(--space-md);
 }
 
+/* Loading Screen */
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loading-content {
+  text-align: center;
+}
+
+.loading-glitch {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  color: var(--accent-gold);
+  animation: glitch 0.5s infinite;
+  letter-spacing: 4px;
+  text-shadow: 0 0 20px var(--accent-gold);
+}
+
+.loading-sub {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: var(--space-md);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* Login Screen */
+.login-screen {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #000 0%, #0a1543 50%, #000 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--space-lg);
+  overflow-y: auto;
+}
+
+.login-content {
+  text-align: center;
+  max-width: 360px;
+  width: 100%;
+}
+
+.login-system-icon {
+  font-size: 3rem;
+  margin-bottom: var(--space-md);
+  animation: pulse-glow 3s infinite;
+}
+
+.login-title {
+  font-family: var(--font-heading);
+  font-size: 2.2rem;
+  color: var(--accent-gold);
+  letter-spacing: 6px;
+  text-shadow: 0 0 20px rgba(255, 214, 10, 0.5);
+}
+
+.login-subtitle {
+  font-size: 0.9rem;
+  color: var(--accent-blue);
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  margin-top: var(--space-sm);
+}
+
+.login-quote {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin-top: var(--space-lg);
+  padding: var(--space-md);
+  border-left: 2px solid var(--accent-gold);
+  opacity: 0.7;
+}
+
+.login-form {
+  margin-top: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.login-error {
+  background: rgba(255, 71, 87, 0.1);
+  border: 1px solid var(--danger);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  color: var(--danger);
+  font-size: 0.85rem;
+  text-align: center;
+  font-family: var(--font-body);
+}
+
+.login-toggle {
+  margin-top: var(--space-lg);
+  background: none;
+  border: 1px solid var(--text-secondary);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.login-toggle:hover:not(:disabled) {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+}
+
+.login-toggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.login-loading {
+  animation: glitch 0.5s infinite;
+}
+
+/* Difficulty Selector */
+.difficulty-section {
+  margin-top: var(--space-lg);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  border: 1px solid rgba(79, 195, 247, 0.2);
+}
+
+.difficulty-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+.difficulty-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: var(--bg-panel);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font-body);
+  color: var(--text-primary);
+}
+
+.difficulty-btn:hover {
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 10px rgba(255, 214, 10, 0.2);
+}
+
+.difficulty-btn.selected {
+  border-color: var(--accent-gold);
+  background: rgba(255, 214, 10, 0.1);
+  box-shadow: 0 0 15px rgba(255, 214, 10, 0.3);
+}
+
+.difficulty-rank {
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--accent-gold);
+}
+
+.difficulty-label {
+  font-size: 0.7rem;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.difficulty-desc {
+  font-size: 0.6rem;
+  color: var(--text-secondary);
+}
+
 /* Loading */
 .loading {
   display: flex;

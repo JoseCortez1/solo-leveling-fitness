@@ -1,4 +1,5 @@
 export type Rank = 'E' | 'D' | 'C' | 'B' | 'A' | 'S';
+export type Difficulty = 'E' | 'D' | 'C' | 'B' | 'A' | 'S';
 
 export interface Stats {
   str: number;
