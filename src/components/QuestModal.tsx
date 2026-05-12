@@ -21,14 +21,15 @@ const exerciseEmojis: Record<string, string> = {
 };
 
 export function QuestModal({ quest, onClose, onUpdateReps, onComplete }: QuestModalProps) {
-  const [reps, setReps] = useState(quest.currentReps);
+  const targetReps = quest.targetReps ?? 1;
+  const [reps, setReps] = useState(quest.currentReps ?? 0);
 
   useEffect(() => {
-    setReps(quest.currentReps);
+    setReps(quest.currentReps ?? 0);
   }, [quest.currentReps]);
 
   const increment = () => {
-    if (reps < quest.targetReps) {
+    if (reps < targetReps) {
       const newReps = reps + 1;
       setReps(newReps);
       onUpdateReps(quest.id, newReps);
@@ -48,8 +49,8 @@ export function QuestModal({ quest, onClose, onUpdateReps, onComplete }: QuestMo
     onClose();
   };
 
-  const canComplete = reps >= quest.targetReps && !quest.completed;
-  const progress = (reps / quest.targetReps) * 100;
+  const canComplete = reps >= targetReps && !quest.completed;
+  const progress = (reps / Math.max(targetReps, 1)) * 100;
   const isPlankOrWallSit = quest.exercise === 'plank' || quest.exercise === 'wallsit';
   const exerciseName = quest.exercise.charAt(0).toUpperCase() + quest.exercise.slice(1);
 
@@ -103,7 +104,7 @@ export function QuestModal({ quest, onClose, onUpdateReps, onComplete }: QuestMo
                 {exerciseName}
               </span>
               <span className="text-text-secondary text-sm">
-                Target: {quest.targetReps} {isPlankOrWallSit ? 'seconds' : 'reps'}
+                Target: {targetReps} {isPlankOrWallSit ? 'seconds' : 'reps'}
               </span>
             </div>
           </div>
@@ -153,7 +154,7 @@ export function QuestModal({ quest, onClose, onUpdateReps, onComplete }: QuestMo
                 </motion.div>
               </AnimatePresence>
               <div className="text-text-secondary text-sm">
-                / {quest.targetReps} {isPlankOrWallSit ? 'sec' : 'reps'}
+                / {targetReps} {isPlankOrWallSit ? 'sec' : 'reps'}
               </div>
             </div>
 

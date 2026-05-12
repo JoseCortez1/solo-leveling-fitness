@@ -103,7 +103,7 @@ export function Dashboard({ hunter, dailyState, onOpenQuests }: DashboardProps) 
                       {statLabels[stat]}
                     </div>
                     <div className="text-lg font-bold text-text-primary font-heading">
-                      {hunter.stats[stat]}
+                      {(hunter.stats?.[stat as keyof typeof hunter.stats] ?? 0)}
                     </div>
                   </div>
                 </div>
@@ -141,7 +141,7 @@ export function Dashboard({ hunter, dailyState, onOpenQuests }: DashboardProps) 
 
             <div className="flex flex-col items-center p-3 rounded-lg bg-white/5">
               <div className="text-2xl font-bold text-success font-heading">
-                {hunter.streak}
+                {hunter.streak ?? 0}
               </div>
               <div className="text-xs text-text-secondary font-body text-center mt-1">
                 Day Streak

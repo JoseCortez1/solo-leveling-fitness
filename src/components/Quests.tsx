@@ -29,7 +29,9 @@ export function Quests({ dailyState, onQuestClick }: QuestsProps) {
       )}
 
       {dailyState.quests.map((quest, index) => {
-        const progress = (quest.currentReps / quest.targetReps) * 100;
+        const currentReps = quest.currentReps ?? 0;
+        const targetReps = quest.targetReps ?? 1;
+        const progress = (currentReps / Math.max(targetReps, 1)) * 100;
         const isPlankOrWallSit = quest.exercise === 'plank' || quest.exercise === 'wallsit';
 
         return (
@@ -52,7 +54,7 @@ export function Quests({ dailyState, onQuestClick }: QuestsProps) {
                   {quest.name}
                 </span>
                 <Badge variant="gold" className="shrink-0">
-                  +{quest.xpReward} XP
+                  +{quest.xpReward ?? 0} XP
                 </Badge>
               </div>
 
@@ -74,7 +76,7 @@ export function Quests({ dailyState, onQuestClick }: QuestsProps) {
                   />
                 </div>
                 <span className="text-text-secondary text-sm font-mono min-w-[60px] text-right">
-                  {quest.currentReps} / {quest.targetReps}
+                  {currentReps} / {targetReps}
                   <span className="text-text-secondary/60 text-xs ml-1">
                     {isPlankOrWallSit ? 'sec' : 'reps'}
                   </span>

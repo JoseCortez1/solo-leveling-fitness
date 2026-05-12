@@ -1,10 +1,13 @@
 import { Hunter, RANK_ORDER, RANK_COLORS, RANK_THRESHOLDS } from '../types';
+import { useAuth } from '../context/AuthContext';
+import { Button } from './ui/button';
 
 interface ProfileProps {
   hunter: Hunter;
 }
 
 export function Profile({ hunter }: ProfileProps) {
+  const { logout } = useAuth();
   const currentRankIndex = RANK_ORDER.indexOf(hunter.rank);
 
   const getDaysSinceCreation = () => {
@@ -51,15 +54,15 @@ export function Profile({ hunter }: ProfileProps) {
         <div className="font-heading text-xs text-accent-blue uppercase tracking-widest mb-4">Hunter Statistics</div>
         <div className="grid grid-cols-2 gap-3">
           <div className="text-center p-3 bg-bg-secondary rounded-lg">
-            <div className="text-2xl font-bold text-accent-gold">{hunter.level}</div>
+            <div className="text-2xl font-bold text-accent-gold">{hunter.level ?? 0}</div>
             <div className="text-[0.7rem] text-text-secondary uppercase mt-1">Current Level</div>
           </div>
           <div className="text-center p-3 bg-bg-secondary rounded-lg">
-            <div className="text-2xl font-bold text-accent-gold">{hunter.xp}</div>
+            <div className="text-2xl font-bold text-accent-gold">{hunter.xp ?? 0}</div>
             <div className="text-[0.7rem] text-text-secondary uppercase mt-1">Current XP</div>
           </div>
           <div className="text-center p-3 bg-bg-secondary rounded-lg">
-            <div className="text-2xl font-bold text-accent-gold">{hunter.streak}</div>
+            <div className="text-2xl font-bold text-accent-gold">{hunter.streak ?? 0}</div>
             <div className="text-[0.7rem] text-text-secondary uppercase mt-1">Day Streak</div>
           </div>
           <div className="text-center p-3 bg-bg-secondary rounded-lg">
@@ -83,11 +86,20 @@ export function Profile({ hunter }: ProfileProps) {
           <div className="flex justify-between items-center p-2 px-3 bg-bg-secondary rounded-lg">
             <span className="text-[0.85rem] text-text-secondary">Total Stats</span>
             <span className="font-semibold text-accent-gold">
-              {hunter.stats.str + hunter.stats.sta + hunter.stats.agi + hunter.stats.vit}
+              {(hunter.stats?.str ?? 0) + (hunter.stats?.sta ?? 0) + (hunter.stats?.agi ?? 0) + (hunter.stats?.vit ?? 0)}
             </span>
           </div>
         </div>
       </div>
+
+      <Button
+        variant="danger"
+        size="lg"
+        className="w-full"
+        onClick={logout}
+      >
+        [SYSTEM] Disconnect — Logout
+      </Button>
     </div>
   );
 }

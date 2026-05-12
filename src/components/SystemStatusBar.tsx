@@ -5,8 +5,10 @@ interface SystemStatusBarProps {
 }
 
 export function SystemStatusBar({ hunter }: SystemStatusBarProps) {
-  const xpForNextLevel = hunter.level * 100;
-  const xpPercentage = Math.min((hunter.xp / xpForNextLevel) * 100, 100);
+  const level = hunter.level ?? 1;
+  const currentXp = hunter.xp ?? 0;
+  const xpForNextLevel = Math.max(level * 100, 1);
+  const xpPercentage = Math.min((currentXp / xpForNextLevel) * 100, 100);
 
   return (
     <div className="sticky top-0 bg-bg-secondary z-[100] p-4 flex items-center gap-4"
@@ -25,7 +27,7 @@ export function SystemStatusBar({ hunter }: SystemStatusBarProps) {
         {hunter.rank}
       </div>
       <div className="flex-1 flex flex-col gap-1">
-        <div className="text-[0.75rem] text-text-secondary uppercase tracking-widest">Level {hunter.level}</div>
+        <div className="text-[0.75rem] text-text-secondary uppercase tracking-widest">Level {level}</div>
         <div className="h-2 bg-bg-panel rounded overflow-hidden relative">
           <div
             className="h-full rounded transition-all duration-500 relative"
@@ -43,7 +45,7 @@ export function SystemStatusBar({ hunter }: SystemStatusBarProps) {
           </div>
         </div>
         <div className="text-[0.7rem] text-text-secondary mt-0.5 font-mono">
-          {hunter.xp} / {xpForNextLevel} XP
+          {currentXp} / {xpForNextLevel} XP
         </div>
       </div>
     </div>
