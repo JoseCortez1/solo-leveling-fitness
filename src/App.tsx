@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { useAuth } from './context/AuthContext';
 import { api } from './api/client';
 import { TabType } from './components/TabBar';
@@ -36,15 +37,7 @@ function App() {
     try {
       const h = await api.getHunter() as any;
       // Normalize API response (flat str/sta/agi/vit) to nested stats format
-      const normalized = {
-        ...h,
-        stats: {
-          str: h.str ?? 5,
-          sta: h.sta ?? 5,
-          agi: h.agi ?? 5,
-          vit: h.vit ?? 5,
-        },
-      };
+      const normalized = normalizeHunter(h);
       setHunter(normalized);
       const q = await api.getQuests();
       setDailyState(q);
@@ -67,7 +60,7 @@ function App() {
         vit: bonusStats.vit,
         difficulty,
       });
-      setHunter(h);
+      setHunter(normalizeHunter(h));
       const q = await api.getQuests();
       setDailyState(q);
     } catch (e) {
@@ -132,6 +125,16 @@ function App() {
     return <ActivationScreen onActivate={handleActivate} />;
   }
 
+  const normalizeHunter = (h: any) => ({
+    ...h,
+    stats: {
+      str: h.str ?? 5,
+      sta: h.sta ?? 5,
+      agi: h.agi ?? 5,
+      vit: h.vit ?? 5,
+    },
+  });
+
   const handleQuestClick = (quest: Quest) => {
     setSelectedQuest(quest);
   };
@@ -168,7 +171,8 @@ function App() {
 
       <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
 
-      {selectedQuest && (
+      <AnimatePresence>
+        {selectedQuest && (
         <QuestModal
           quest={selectedQuest}
           onClose={handleCloseQuest}
@@ -176,6 +180,7 @@ function App() {
           onComplete={completeQuest}
         />
       )}
+      </AnimatePresence>
 
       {showLevelUp && levelUpLevel && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[500] animate-[fade-in_0.3s_ease-out]">

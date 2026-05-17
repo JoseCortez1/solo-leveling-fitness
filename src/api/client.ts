@@ -1,3 +1,5 @@
+import { Quest } from '../types';
+
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
 interface RequestOptions {
@@ -72,6 +74,19 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
 }
 
 // Auth
+export function normalizeQuest(q: any): Quest {
+  return {
+    id: q.id,
+    name: q.name,
+    description: q.description,
+    exercise: q.exercise,
+    targetReps: q.target_reps ?? 1,
+    currentReps: q.current_reps ?? 0,
+    xpReward: q.xp_reward ?? 0,
+    completed: q.completed === 1 || q.completed === true,
+  };
+}
+
 export const api = {
   // Auth
   register: (name: string, email: string, password: string) =>
@@ -98,7 +113,11 @@ export const api = {
     request('/api/hunter/difficulty', { method: 'PUT', body: { difficulty } }),
 
   // Quests
-  getQuests: () => request<{ date: string; quests: any[]; questsCompleted: number }>('/api/quests'),
+  getQuests: () =>
+    request<{ date: string; quests: any[]; questsCompleted: number }>('/api/quests').then(res => ({
+      ...res,
+      quests: res.quests.map(normalizeQuest),
+    })),
 
   updateQuestProgress: (questId: string, currentReps: number) =>
     request(`/api/quests/${questId}/progress`, { method: 'PUT', body: { currentReps } }),

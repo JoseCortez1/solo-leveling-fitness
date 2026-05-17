@@ -1,6 +1,4 @@
 import { Hunter, DailyState, RANK_COLORS } from '../types';
-import { Card, CardContent } from './ui/card';
-import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 
 interface DashboardProps {
@@ -22,138 +20,437 @@ export function Dashboard({ hunter, dailyState, onOpenQuests }: DashboardProps) 
     return titles[hunter.rank] || 'Hunter';
   };
 
-  const statImages = {
-    str: '/assets/stat-strength.png',
-    sta: '/assets/stat-stamina.png',
-    agi: '/assets/stat-agility.png',
-    vit: '/assets/stat-vitality.png',
-  };
-
-  const statLabels = {
-    str: 'Strength',
-    sta: 'Stamina',
-    agi: 'Agility',
-    vit: 'Vitality',
-  };
-
-  const statGradients = {
-    str: 'from-red-500/20 to-red-600/10',
-    sta: 'from-green-500/20 to-green-600/10',
-    agi: 'from-blue-500/20 to-blue-600/10',
-    vit: 'from-purple-500/20 to-purple-600/10',
-  };
-
   const rankColor = RANK_COLORS[hunter.rank];
 
+  // XP calculation
+  const level = hunter.level || 1;
+  const xpForNextLevel = level * 100;
+  const currentXp = hunter.xp || 0;
+
+  // HP as XP bar
+  const hpPercent = Math.min((currentXp / xpForNextLevel) * 100, 100);
+  const mpPercent = 10; // Static for now
+
+  const completedQuests = dailyState?.questsCompleted ?? 0;
+  const totalQuests = dailyState?.quests?.length ?? 0;
+  const streak = hunter.streak ?? 0;
+
+  // Stats
+  const str = hunter.stats?.str ?? 0;
+  const vit = hunter.stats?.vit ?? 0;
+  const agi = hunter.stats?.agi ?? 0;
+  const sta = hunter.stats?.sta ?? 0;
+
   return (
-    <div className="flex flex-col gap-4 p-4">
-      {/* Hunter Card */}
-      <Card className="overflow-hidden">
-        <CardContent className="p-5">
-          <div className="flex items-center gap-4">
-            {/* Avatar with gradient */}
+    <div className="flex flex-col gap-4 p-4 min-h-screen" style={{ background: 'var(--bg-void)' }}>
+      {/* Main Stats Panel */}
+      <div
+        className="relative overflow-hidden"
+        style={{
+          background: 'var(--bg-panel)',
+          backdropFilter: 'blur(12px)',
+          border: '1px solid var(--blue-dim)',
+          boxShadow: '0 0 20px rgba(30, 144, 255, 0.15), 0 0 40px rgba(30, 144, 255, 0.05)',
+          clipPath: 'polygon(8px 0%, calc(100% - 8px) 0%, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0% calc(100% - 8px), 0% 8px)',
+          animation: 'borderPulse 2.5s ease-in-out infinite, systemBoot 400ms ease-out',
+        }}
+      >
+        {/* Scanlines overlay */}
+        <div
+          className="pointer-events-none absolute inset-0 z-10"
+          style={{
+            background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 150, 255, 0.03) 2px, rgba(0, 150, 255, 0.03) 4px)',
+          }}
+        />
+
+        {/* Header */}
+        <div className="relative px-5 pt-5 pb-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {/* Rank badge */}
+              <div
+                className="w-12 h-12 flex items-center justify-center font-heading text-xl font-bold"
+                style={{
+                  color: rankColor,
+                  border: `2px solid ${rankColor}`,
+                  background: 'var(--blue-ghost)',
+                  clipPath: 'polygon(6px 0%, calc(100% - 6px) 0%, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0% calc(100% - 6px), 0% 6px)',
+                  textShadow: `0 0 10px ${rankColor}`,
+                  animation: 'borderPulse 2.5s ease-in-out infinite',
+                }}
+              >
+                {hunter.rank}
+              </div>
+
+              <div>
+                <div
+                  className="font-heading text-base tracking-widest uppercase"
+                  style={{ color: 'var(--text-primary)', letterSpacing: '0.2em' }}
+                >
+                  {hunter.name}
+                </div>
+                <div
+                  className="font-body text-xs tracking-wide"
+                  style={{ color: 'var(--text-secondary)' }}
+                >
+                  {getTitle()}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div
+          className="mx-5 h-px"
+          style={{
+            background: 'linear-gradient(90deg, transparent, var(--blue-dim) 20%, var(--blue-dim) 80%, transparent)',
+          }}
+        />
+
+        {/* HP/MP Bars */}
+        <div className="px-5 py-4">
+          <div className="space-y-3">
+            {/* HP Bar (XP) */}
+            <div className="flex items-center gap-3">
+              <span
+                className="font-body text-xs font-semibold w-8 uppercase"
+                style={{ color: 'var(--text-secondary)', letterSpacing: '0.15em' }}
+              >
+                HP
+              </span>
+              <div
+                className="flex-1 h-5 relative overflow-hidden"
+                style={{
+                  background: 'var(--blue-ghost)',
+                  border: '1px solid var(--blue-dim)',
+                }}
+              >
+                <div
+                  className="h-full relative"
+                  style={{
+                    width: `${hpPercent}%`,
+                    background: 'var(--bar-hp)',
+                    boxShadow: '0 0 10px var(--bar-hp)',
+                  }}
+                >
+                  {/* Shimmer overlay */}
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)',
+                      backgroundSize: '200% 100%',
+                      animation: 'barShimmer 2s linear infinite',
+                    }}
+                  />
+                </div>
+              </div>
+              <span
+                className="font-mono text-sm w-20 text-right"
+                style={{ color: 'var(--text-accent)' }}
+              >
+                {currentXp}/{xpForNextLevel}
+              </span>
+            </div>
+
+            {/* MP Bar */}
+            <div className="flex items-center gap-3">
+              <span
+                className="font-body text-xs font-semibold w-8 uppercase"
+                style={{ color: 'var(--text-secondary)', letterSpacing: '0.15em' }}
+              >
+                MP
+              </span>
+              <div
+                className="flex-1 h-5 relative overflow-hidden"
+                style={{
+                  background: 'var(--blue-ghost)',
+                  border: '1px solid var(--blue-dim)',
+                }}
+              >
+                <div
+                  className="h-full relative"
+                  style={{
+                    width: `${mpPercent}%`,
+                    background: 'var(--bar-mp)',
+                    boxShadow: '0 0 10px var(--bar-mp)',
+                  }}
+                >
+                  {/* Shimmer overlay */}
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)',
+                      backgroundSize: '200% 100%',
+                      animation: 'barShimmer 2s linear infinite',
+                    }}
+                  />
+                </div>
+              </div>
+              <span
+                className="font-mono text-sm w-20 text-right"
+                style={{ color: 'var(--text-accent)' }}
+              >
+                {mpPercent}/100
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="px-5 pb-5">
+          <div className="grid grid-cols-2 gap-3">
+            {/* STR */}
             <div
-              className="w-14 h-14 rounded-xl bg-gradient-to-br from-accent-gold to-yellow-600 flex items-center justify-center text-2xl shadow-lg shadow-accent-gold/30 shrink-0"
-              style={{ border: `2px solid ${rankColor}` }}
-            >
-              ⚔️
-            </div>
-
-            {/* Hunter info */}
-            <div className="flex-1 min-w-0">
-              <div className="font-heading text-lg text-text-primary truncate">
-                {hunter.name}
-              </div>
-              <div className="text-sm font-medium" style={{ color: rankColor }}>
-                {getTitle()}
-              </div>
-            </div>
-
-            {/* Rank Badge */}
-            <Badge
-              variant="rank"
-              className="text-xl font-bold w-12 h-12 rounded-full flex items-center justify-center shrink-0"
+              className="flex items-center gap-3 p-3"
               style={{
-                color: rankColor,
-                borderColor: rankColor,
-                backgroundColor: `${rankColor}15`,
+                background: 'var(--blue-ghost)',
+                border: '1px solid var(--blue-dim)',
+                clipPath: 'polygon(4px 0%, calc(100% - 4px) 0%, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0% calc(100% - 4px), 0% 4px)',
               }}
             >
-              {hunter.rank}
-            </Badge>
-          </div>
-
-          {/* Stats Grid 2x2 */}
-          <div className="grid grid-cols-2 gap-3 mt-5">
-            {(Object.keys(hunter.stats) as Array<keyof typeof hunter.stats>).map(stat => {
-              return (
-                <div
-                  key={stat}
-                  className={`flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r ${statGradients[stat]} border border-white/5`}
+              <div
+                className="w-8 h-8 flex items-center justify-center"
+                style={{
+                  color: 'var(--blue-glow)',
+                  filter: 'drop-shadow(0 0 4px var(--blue-glow))',
+                  animation: 'borderPulse 2.5s ease-in-out infinite',
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                </svg>
+              </div>
+              <div className="flex flex-col">
+                <span
+                  className="font-body text-xs font-semibold uppercase"
+                  style={{ color: 'var(--text-secondary)', letterSpacing: '0.1em' }}
                 >
-                  <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${statGradients[stat]} flex items-center justify-center shrink-0`}>
-                    <img
-                      src={statImages[stat]}
-                      alt={statLabels[stat]}
-                      className="w-[18px] h-[18px] object-contain"
-                    />
-                  </div>
-                  <div className="flex flex-col min-w-0">
-                    <div className="text-xs text-text-secondary font-body">
-                      {statLabels[stat]}
-                    </div>
-                    <div className="text-lg font-bold text-text-primary font-heading">
-                      {(hunter.stats?.[stat as keyof typeof hunter.stats] ?? 0)}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+                  STR
+                </span>
+                <span
+                  className="font-mono text-xl font-bold"
+                  style={{ color: 'var(--text-accent)' }}
+                >
+                  {str}
+                </span>
+              </div>
+            </div>
+
+            {/* VIT */}
+            <div
+              className="flex items-center gap-3 p-3"
+              style={{
+                background: 'var(--blue-ghost)',
+                border: '1px solid var(--blue-dim)',
+                clipPath: 'polygon(4px 0%, calc(100% - 4px) 0%, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0% calc(100% - 4px), 0% 4px)',
+              }}
+            >
+              <div
+                className="w-8 h-8 flex items-center justify-center"
+                style={{
+                  color: 'var(--bar-hp)',
+                  filter: 'drop-shadow(0 0 4px var(--bar-hp))',
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                </svg>
+              </div>
+              <div className="flex flex-col">
+                <span
+                  className="font-body text-xs font-semibold uppercase"
+                  style={{ color: 'var(--text-secondary)', letterSpacing: '0.1em' }}
+                >
+                  VIT
+                </span>
+                <span
+                  className="font-mono text-xl font-bold"
+                  style={{ color: 'var(--text-accent)' }}
+                >
+                  {vit}
+                </span>
+              </div>
+            </div>
+
+            {/* AGI */}
+            <div
+              className="flex items-center gap-3 p-3"
+              style={{
+                background: 'var(--blue-ghost)',
+                border: '1px solid var(--blue-dim)',
+                clipPath: 'polygon(4px 0%, calc(100% - 4px) 0%, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0% calc(100% - 4px), 0% 4px)',
+              }}
+            >
+              <div
+                className="w-8 h-8 flex items-center justify-center"
+                style={{
+                  color: 'var(--blue-glow)',
+                  filter: 'drop-shadow(0 0 4px var(--blue-glow))',
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                </svg>
+              </div>
+              <div className="flex flex-col">
+                <span
+                  className="font-body text-xs font-semibold uppercase"
+                  style={{ color: 'var(--text-secondary)', letterSpacing: '0.1em' }}
+                >
+                  AGI
+                </span>
+                <span
+                  className="font-mono text-xl font-bold"
+                  style={{ color: 'var(--text-accent)' }}
+                >
+                  {agi}
+                </span>
+              </div>
+            </div>
+
+            {/* STA */}
+            <div
+              className="flex items-center gap-3 p-3"
+              style={{
+                background: 'var(--blue-ghost)',
+                border: '1px solid var(--blue-dim)',
+                clipPath: 'polygon(4px 0%, calc(100% - 4px) 0%, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0% calc(100% - 4px), 0% 4px)',
+              }}
+            >
+              <div
+                className="w-8 h-8 flex items-center justify-center"
+                style={{
+                  color: 'var(--bar-mp)',
+                  filter: 'drop-shadow(0 0 4px var(--bar-mp))',
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                </svg>
+              </div>
+              <div className="flex flex-col">
+                <span
+                  className="font-body text-xs font-semibold uppercase"
+                  style={{ color: 'var(--text-secondary)', letterSpacing: '0.1em' }}
+                >
+                  STA
+                </span>
+                <span
+                  className="font-mono text-xl font-bold"
+                  style={{ color: 'var(--text-accent)' }}
+                >
+                  {sta}
+                </span>
+              </div>
+            </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {/* Daily Progress Card */}
-      <Card>
-        <CardContent className="p-5">
-          <h3 className="font-heading text-base text-text-primary mb-4">
-            Daily Hunt Progress
-          </h3>
+      {/* Daily Progress Panel */}
+      <div
+        className="relative overflow-hidden"
+        style={{
+          background: 'var(--bg-panel)',
+          backdropFilter: 'blur(12px)',
+          border: '1px solid var(--blue-dim)',
+          boxShadow: '0 0 15px rgba(30, 144, 255, 0.1)',
+          clipPath: 'polygon(8px 0%, calc(100% - 8px) 0%, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0% calc(100% - 8px), 0% 8px)',
+          animation: 'systemBoot 400ms ease-out 100ms both',
+        }}
+      >
+        {/* Scanlines */}
+        <div
+          className="pointer-events-none absolute inset-0 z-10"
+          style={{
+            background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 150, 255, 0.03) 2px, rgba(0, 150, 255, 0.03) 4px)',
+          }}
+        />
 
+        <div className="relative px-5 py-4">
+          {/* Title */}
+          <div
+            className="font-heading text-xs uppercase tracking-widest mb-4 flex items-center gap-2"
+            style={{ color: 'var(--text-primary)', letterSpacing: '0.2em' }}
+          >
+            <span style={{ color: 'var(--blue-glow)' }}>⚔</span>
+            <span>DAILY PROGRESS</span>
+          </div>
+
+          {/* Stats row */}
           <div className="grid grid-cols-3 gap-3 mb-4">
-            <div className="flex flex-col items-center p-3 rounded-lg bg-white/5">
-              <div className="text-2xl font-bold text-accent-blue font-heading">
-                {dailyState?.questsCompleted ?? 0}
+            <div className="text-center">
+              <div
+                className="font-mono text-2xl font-bold"
+                style={{ color: 'var(--text-accent)' }}
+              >
+                {completedQuests}
               </div>
-              <div className="text-xs text-text-secondary font-body text-center mt-1">
-                Quests Cleared
-              </div>
-            </div>
-
-            <div className="flex flex-col items-center p-3 rounded-lg bg-white/5">
-              <div className="text-2xl font-bold text-accent-gold font-heading">
-                {dailyState?.quests.length ?? 0}
-              </div>
-              <div className="text-xs text-text-secondary font-body text-center mt-1">
-                Total Quests
+              <div
+                className="font-body text-xs uppercase mt-1"
+                style={{ color: 'var(--text-secondary)', letterSpacing: '0.05em' }}
+              >
+                Cleared
               </div>
             </div>
 
-            <div className="flex flex-col items-center p-3 rounded-lg bg-white/5">
-              <div className="text-2xl font-bold text-success font-heading">
-                {hunter.streak ?? 0}
+            <div className="text-center">
+              <div
+                className="font-mono text-2xl font-bold"
+                style={{ color: 'var(--bar-xp)' }}
+              >
+                {totalQuests}
               </div>
-              <div className="text-xs text-text-secondary font-body text-center mt-1">
-                Day Streak
+              <div
+                className="font-body text-xs uppercase mt-1"
+                style={{ color: 'var(--text-secondary)', letterSpacing: '0.05em' }}
+              >
+                Total
+              </div>
+            </div>
+
+            <div className="text-center">
+              <div
+                className="font-mono text-2xl font-bold"
+                style={{ color: 'var(--bar-hp)' }}
+              >
+                {streak}
+              </div>
+              <div
+                className="font-body text-xs uppercase mt-1"
+                style={{ color: 'var(--text-secondary)', letterSpacing: '0.05em' }}
+              >
+                Streak
               </div>
             </div>
           </div>
 
-          <Button variant="blue" className="w-full" onClick={onOpenQuests}>
-            View Today's Quests
+          {/* Action Button */}
+          <Button
+            className="w-full h-12 font-heading text-sm tracking-widest uppercase transition-all duration-200"
+            style={{
+              background: 'transparent',
+              border: '1px solid var(--blue-glow)',
+              color: 'var(--blue-glow)',
+              letterSpacing: '0.15em',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'var(--blue-glow)';
+              e.currentTarget.style.color = 'var(--bg-void)';
+              e.currentTarget.style.transform = 'scale(1.02)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = 'var(--blue-glow)';
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
+            onClick={onOpenQuests}
+          >
+            VIEW QUESTS
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
